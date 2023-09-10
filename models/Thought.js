@@ -1,5 +1,5 @@
 const { Schema, model } = require('mongoose');
-const assignmentSchema = require('./Assignment');
+const reactionSchema = require('./Reaction');
 
 // Schema to create Student model
 const thoughtSchema = new Schema(
@@ -31,7 +31,7 @@ const thoughtSchema = new Schema(
   }
 );
 
-userSchema.virtual("reactionCount").get(function() {
+thoughtSchema.virtual("reactionCount").get(function() {
   return this.reactions.length
 })
 
