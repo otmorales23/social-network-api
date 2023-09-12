@@ -1,8 +1,8 @@
 const { ObjectId } = require('mongoose').Types;
 const { User, Thought } = require('../models');
 
-getAllUser,
-getSingleUser,
+getAllUsers,
+getUser,
 createUser,
 updateUser,
 deleteUser,
@@ -10,14 +10,10 @@ addFriend,
 removeFriend,
 
 module.exports = {
-  getAllUser(req, res) {
-    Student.find()
-      .then(async (students) => {
-        const studentObj = {
-          students,
-          headCount: await headCount(),
-        };
-        return res.json(studentObj);
+  getAllUsers(req, res) {
+    User.find()
+      .then((users) => {
+        res.json(users);
       })
       .catch((err) => {
         console.log(err);
@@ -26,16 +22,16 @@ module.exports = {
   },
   
 
-  getSingleUser(req, res) {
-    Student.findOne({ _id: req.params.studentId })
+  getUser(req, res) {
+    User.findOne({ _id: req.params.userId })
       .select('-__v')
       .lean()
-      .then(async (student) =>
-        !student
-          ? res.status(404).json({ message: 'No student with that ID' })
+      .then(async (user) =>
+        !user
+          ? res.status(404).json({ message: 'No user with that ID' })
           : res.json({
-              student,
-              grade: await grade(req.params.studentId),
+              user,
+              thought: await thought(req.params.thoughtId),
             })
       )
       .catch((err) => {
@@ -46,29 +42,29 @@ module.exports = {
   
 
   createUser(req, res) {
-    Student.create(req.body)
-      .then((student) => res.json(student))
+    User.create(req.body)
+      .then((user) => res.json(user))
       .catch((err) => res.status(500).json(err));
   },
   
 
   deleteUser(req, res) {
-    Student.findOneAndRemove({ _id: req.params.studentId })
-      .then((student) =>
-        !student
-          ? res.status(404).json({ message: 'No such student exists' })
-          : Course.findOneAndUpdate(
-              { students: req.params.studentId },
-              { $pull: { students: req.params.studentId } },
+    User.findOneAndRemove({ _id: req.params.userId })
+      .then((user) =>
+        !user
+          ? res.status(404).json({ message: 'No such user exists' })
+          : Thought.findOneAndUpdate(
+              { users: req.params.userId },
+              { $pull: { users: req.params.userId } },
               { new: true }
             )
       )
-      .then((course) =>
-        !course
+      .then((thought) =>
+        !thought
           ? res.status(404).json({
-              message: 'Student deleted, but no courses found',
+              message: 'user deleted, but no thoughts found',
             })
-          : res.json({ message: 'Student successfully deleted' })
+          : res.json({ message: 'user successfully deleted' })
       )
       .catch((err) => {
         console.log(err);
@@ -77,42 +73,42 @@ module.exports = {
   },
 
   updateUser(req, res) {
-    Student.create(req.body)
-      .then((student) => res.json(student))
+    User.create(req.body)
+      .then((user) => res.json(user))
       .catch((err) => res.status(500).json(err));
   },
 
   addFriend(req, res) {
-    console.log('You are adding an assignment');
+    console.log('You are adding a reaction');
     console.log(req.body);
-    Student.findOneAndUpdate(
-      { _id: req.params.studentId },
-      { $addToSet: { assignments: req.body } },
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $addToSet: { reaction: req.body } },
       { runValidators: true, new: true }
     )
-      .then((student) =>
-        !student
+      .then((user) =>
+        !user
           ? res
               .status(404)
-              .json({ message: 'No student found with that ID :(' })
-          : res.json(student)
+              .json({ message: 'No user found with that ID :(' })
+          : res.json(user)
       )
       .catch((err) => res.status(500).json(err));
   },
   
 
   removeFriend(req, res) {
-    Student.findOneAndUpdate(
-      { _id: req.params.studentId },
-      { $pull: { assignment: { assignmentId: req.params.assignmentId } } },
+    User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $pull: { reaction: { reactionId: req.params.reactionId } } },
       { runValidators: true, new: true }
     )
-      .then((student) =>
-        !student
+      .then((user) =>
+        !user
           ? res
               .status(404)
-              .json({ message: 'No student found with that ID :(' })
-          : res.json(student)
+              .json({ message: 'No user found with that ID :(' })
+          : res.json(user)
       )
       .catch((err) => res.status(500).json(err));
   },
